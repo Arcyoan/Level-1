@@ -1,0 +1,89 @@
+# Level-1
+## Q1, variance
+hydro <- read.csv("https://people.ucsc.edu/~mclapham/eart125/data/hydrothermal.csv")
+parallel <- subset(hydro, (flow_direction == "parallel"))
+var(parallel$flow_rate)
+perpendicular <- subset(hydro, (flow_direction == "perpendicular"))
+var(perpendicular$flow_rate)
+## Variance is greater in parallel. Variance of parallel = 12.23064. Variance of perpendicular is 6.423745
+##Q2, over or under representation
+tropics <- read.csv("https://people.ucsc.edu/~mclapham/eart125/data/foram.csv")
+trop <- subset(tropics,lat >= -23 & lat <= +23)
+length(trop$lat)
+hist(trop$lat)
+length(tropics$lat)
+hist(tropics$lat)
+binom.test(26,42,0.4)
+## Over-represented   data using the binom test the probablity of success is 0.6190476. Length of lat between -23 and 23 is 26. Total length of the lat is 42.
+## Q3 differ signifantly as a function of sediment type, anov?
+
+Arctic <- read.csv("https://people.ucsc.edu/~mclapham/eart125/data/lakemethane.csv")
+Arctic_anova <- aov(methane_flux ~ sed_type, data = Arctic)
+summary(Arctic_anova)
+## Yes it differ significantly, Pr(>F) = 4.27e-08
+
+##Q4 landslide frequency 
+binom.test(5,10, 0.8) ## 1st slope
+binom.test(1, 10, 0.8) ## 2nd slope
+## yes it differs between two sets Probablity of success of 1st slope is 0.5, Propbablity of success of 2nd slope is 0.1
+
+##Q5 Warmer ocean water cause significant greater rate of glacier melting?
+green <- read.csv("https://people.ucsc.edu/~mclapham/eart125/data/greenland.csv")
+melt_rate <- green$melt_rate
+ocean_temp <- green$ocean_temp
+ks.test(melt_rate, ocean_temp) 
+## weak evidence therefore  Does not significantly greater rate of glacier melting. p-value = 0.1545
+
+##Q6 Signifcant changes in crustal thickness in Himalayas in Pala to Neog periods. T-test?
+Him1 <- read.csv("https://people.ucsc.edu/~mclapham/eart125/data/himalaya.csv")
+pala <- Him1$La_Yb[Him1$time == "Paleogene"]
+neo <- Him1$La_Yb[Him1$time == "Neogene"]
+t.test(pala,neo)
+## No there is not a significant change in crustal thickness in Himalayas. The p-value is 3.119e-11, so there is not a significant change in crustal thickness
+
+##Q7 Does the size of pristine craters (modification state "p") differ significantly between type S (structureless floor) and type P (central peak) crater types?
+## Calculate mean of P,S
+venus <- read.csv("https://people.ucsc.edu/~mclapham/eart125/data/venuscrater.csv")
+subset_modp <- subset(venus, modification.state == "p") 
+subset_craterS <- subset(subset_modp, crater.type == "S")
+subset_cratersP <- subset(subset_modp, crater.type == "P")
+p <- subset_cratersP$diameter
+s <-subset_craterS$diameter
+wilcox.test(p,s)
+## No, the size of pristine crater differs significantly between type S and type P. 
+## Using the wilcox test we get a p-value 4.426e-14 which is very close to zero, therefore it doesnt differ significantly.
+
+##Q8 Does the grain size distribution differ significantly between the known salmon spawning site and the alternate site?
+## 
+salmon <- read.csv("https://people.ucsc.edu/~mclapham/eart125/data/salmon_river.csv")
+spawning <- subset(salmon,site == "spawning")
+hist(spawning$grain_size)
+spawning1 <-spawning$grain_size
+alternative <-subset(salmon, site == "alternate")
+hist(alternative$grain_size)
+alternative1 <- alternative$grain_size
+ks.test(spawning1,alternative1)
+## No, it does now.Using ks.test to see if the size distribution differs significantly between the two groups, we are able to get a D = 0.16279.
+
+## Q9 Are river incision rates more variable in active tectonic settings or in the stable continental interior?
+## Compare the variance of two catagory. levene test?
+river <- read.csv("https://people.ucsc.edu/~mclapham/eart125/data/incision_tectonics.csv")
+active <- river$incision[river$setting == "active"]
+plot(river$setting, river$incision)
+stable <- river$incision[river$setting == "stable"]
+library(car)
+leveneTest(incision ~ setting, data = river) 
+##The river incision rates does not differ significantly. F Value =  6.799, Pr (>F) 0.0112  
+
+##Q10 Does the chromium (Cr) content of basalts differ significantly among Archean craton, backarc basin, and intraplate tectonic settings?
+## Testing for variance between different catagories therefore anova
+georoc <-read.csv("https://people.ucsc.edu/~mclapham/eart125/data/georoc.csv")
+subset_georoc <- subset(georoc, (tectonic.setting == "Archean craton" | tectonic.setting == "Backarc basin" | tectonic.setting == "Intraplate") & rock.type == "Basalt")
+basalt_tect <- aov(CR ~ tectonic.setting, data = subset_georoc)
+summary(basalt_tect)
+## Chronium content of the 3 categories does not differ significantly. Using Anova F=3.776
+
+##Q11 Are the abundances of the four rock types in Archean craton tectonic settings consistent with later convergent margin tectonic settings, or are one or more rock types over or underrepresented?
+## Tests for variance anova?
+subset_Ar_Con <- subset(georoc,(tectonic.setting == "Archean craton" | tectonic.setting == "Convergent margin"))
+Arcon_Rock <- aov( ~ tectonic.setting, data = subset_georoc)
